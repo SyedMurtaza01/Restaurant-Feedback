@@ -17,7 +17,7 @@ h1 {
 }
 
 h3 {
-    font-size: 1.75rem; 
+    font-size: 1.5rem; 
     font-weight: 600;  
     color: #343a40;   
     margin-bottom: 20px; 
@@ -92,6 +92,7 @@ button {
     width: 200px;
     margin: 6px;
     font-size: 1rem;
+    border-radius: 12px;
 }
 
 button:disabled {
@@ -101,7 +102,7 @@ button:disabled {
 .btn-secondary {
     font-size: 1rem;
     padding: 6px 25px;
-    border-radius: 10px;
+    border-radius: 12px;
     background-color: #6c757d;
     border: none;
     transition: background-color 0.3s ease;
