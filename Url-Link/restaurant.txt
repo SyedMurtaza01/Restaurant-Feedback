@@ -1,1 +1,4 @@
 https://hellodev.site/Restaurant_Feedback/restaurant/
+
+User Name : manager
+Password : password123
