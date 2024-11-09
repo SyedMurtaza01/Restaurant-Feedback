@@ -5,6 +5,7 @@ include("config.php");
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,7 @@ include("config.php");
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
+
 <body>
     <div class="container">
         <h1 class="my-5 text-center text-primary">We Value Your Feedback!</h1>
@@ -44,7 +46,7 @@ include("config.php");
         <div class="my-2">
             <h3 class="text-center">Enter your mobile number (optional):</h3>
             <div class="d-flex justify-content-center">
-                <input type="text" class="form-control col-10 col-sm-6 col-md-4" id="mobile-number" placeholder="Enter your mobile number" style="width: 50%; max-width: 450px;">
+                <input type="text" class="form-control col-10 col-sm-6 col-md-4" id="mobile-number" placeholder="Enter your mobile number" style="max-width: 450px; padding: 10px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); transition: box-shadow 0.3s ease;">
             </div>
         </div>
 
@@ -52,8 +54,10 @@ include("config.php");
             <button class="btn btn-primary" onclick="submitFeedback()">Submit Feedback</button>
         </div>
 
-        <div class="my-2 text-center">
-            <a href="login.php" class="btn btn-secondary btn-lg">Manager Login</a>
+        <div class="my-4 text-center">
+            <a href="login.php" class="btn btn-primary btn-lg" style="border-radius: 12px; padding: 8px 30px; font-size: 1.1rem; transition: background-color 0.3s ease, transform 0.3s ease;">
+                Manager Login
+            </a>
         </div>
     </div>
 
@@ -77,7 +81,9 @@ include("config.php");
                 document.getElementById('toggle-recording').classList.add('btn-success');
             } else {
                 audioChunks = [];
-                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                navigator.mediaDevices.getUserMedia({
+                    audio: true
+                }).then(stream => {
                     mediaRecorder = new MediaRecorder(stream);
                     mediaRecorder.start();
 
@@ -86,20 +92,22 @@ include("config.php");
                     };
 
                     mediaRecorder.onstop = function() {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioBlob = new Blob(audioChunks, {
+                            type: 'audio/wav'
+                        });
                         const audioUrl = URL.createObjectURL(audioBlob);
                         const formData = new FormData();
                         formData.append("audio", audioBlob, "feedback_audio.wav");
 
                         $.ajax({
-                            url: 'upload_audio.php', 
+                            url: 'upload_audio.php',
                             type: 'POST',
                             data: formData,
                             processData: false,
                             contentType: false,
                             success: function(response) {
                                 const audioFilePath = JSON.parse(response).filePath;
-                                document.getElementById('audio-player').src = audioUrl; 
+                                document.getElementById('audio-player').src = audioUrl;
                                 document.getElementById('audio-file').value = audioFilePath;
                             }
                         });
@@ -151,4 +159,5 @@ include("config.php");
         }
     </script>
 </body>
+
 </html>
