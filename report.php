@@ -8,9 +8,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 include('config.php');
 
+// Get the total number of reviews
 $stmt = $pdo->query("SELECT COUNT(*) as total_reviews FROM feedback");
 $totalReviews = $stmt->fetch(PDO::FETCH_ASSOC)['total_reviews'];
 
+// Get the total number of reviews for each rating
 $stmt = $pdo->query("SELECT COUNT(*) as good_reviews FROM feedback WHERE rating = 'Good'");
 $totalGood = $stmt->fetch(PDO::FETCH_ASSOC)['good_reviews'];
 
@@ -20,22 +22,41 @@ $totalOkay = $stmt->fetch(PDO::FETCH_ASSOC)['okay_reviews'];
 $stmt = $pdo->query("SELECT COUNT(*) as bad_reviews FROM feedback WHERE rating = 'Bad'");
 $totalBad = $stmt->fetch(PDO::FETCH_ASSOC)['bad_reviews'];
 
+// Default filters
 $filter_rating = isset($_GET['rating']) ? $_GET['rating'] : 'All';
-$filter_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-$query = "SELECT id, rating, voice_note, mobile_number, created_at FROM feedback WHERE DATE(created_at) = :date";
+$filter_date = isset($_GET['date']) && $_GET['date'] !== '' ? $_GET['date'] : 'All';
 
-if ($filter_rating != 'All') {
-    $query .= " AND rating = :rating";
+// Base query
+$query = "SELECT id, rating, voice_note, mobile_number, created_at FROM feedback";
+
+// If a date is selected, apply the date filter
+if ($filter_date !== 'All') {
+    $query .= " WHERE DATE(created_at) = :date";
 }
 
-$query .= " ORDER BY created_at DESC";
-$stmt = $pdo->prepare($query);
-$stmt->bindParam(':date', $filter_date);
+// If a rating is selected, apply the rating filter
+if ($filter_rating !== 'All') {
+    if ($filter_date === 'All') {
+        $query .= " WHERE rating = :rating";
+    } else {
+        $query .= " AND rating = :rating";
+    }
+}
 
-if ($filter_rating != 'All') {
+// Apply sorting
+$query .= " ORDER BY created_at DESC";
+
+$stmt = $pdo->prepare($query);
+
+// Bind the parameters
+if ($filter_date !== 'All') {
+    $stmt->bindParam(':date', $filter_date);
+}
+if ($filter_rating !== 'All') {
     $stmt->bindParam(':rating', $filter_rating);
 }
 
+// Execute the query
 $stmt->execute();
 $feedbacks = $stmt->fetchAll();
 ?>
@@ -46,6 +67,7 @@ $feedbacks = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
     <title>Feedback Report</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
@@ -170,14 +192,6 @@ $feedbacks = $stmt->fetchAll();
             color: #fff;
         }
 
-        .filter-container select {
-            font-size: 1.1rem;
-        }
-
-        .table-responsive {
-            margin-top: 20px;
-        }
-
         .emoji-filter {
             display: flex;
             justify-content: flex-end;
@@ -204,13 +218,11 @@ $feedbacks = $stmt->fetchAll();
             background-color: #0056b3;
         }
 
-
         .filter-container input[type="date"] {
             height: 50px;
         }
 
         @media (max-width: 768px) {
-
             .feedback-table th,
             .feedback-table td {
                 font-size: 12px;
@@ -272,7 +284,7 @@ $feedbacks = $stmt->fetchAll();
         <div class="d-flex justify-content-center gap-3 align-items-center">
 
             <form action="" method="GET" class="d-flex">
-                <input type="date" name="date" value="<?php echo $filter_date; ?>" class="form-control w-auto">
+                <input type="date" name="date" value="<?php echo $filter_date === 'All' ? '' : $filter_date; ?>" class="form-control w-auto">
                 <button type="submit" class="btn btn-primary ms-2">Filter by Date</button>
             </form>
 
